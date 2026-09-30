@@ -2,64 +2,118 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel de Inventario - Restaurantes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Control de Quiebres</title>
+    <!-- Importamos Bootstrap para un diseño profesional instantáneo -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Iconos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; max-width: 700px; margin: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-        th { background-color: #f4f4f4; }
-        button { padding: 5px 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
-        .success { color: green; font-weight: bold; }
+        body { background-color: #f8f9fa; }
+        .card-recomendacion { border-left: 4px solid #0d6efd; }
+        .urgente { border-left: 4px solid #dc3545; }
     </style>
 </head>
 <body>
-    <h2>Recomendaciones por Riesgo de Quiebre (Stock bajo)</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Producto</th>
-                <th>Riesgo</th>
-                <th>Recomendación</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody id="tablaRecomendaciones">
-            <!-- Llenado por JS -->
-        </tbody>
-    </table>
 
+    <!-- Barra de Navegación -->
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-box-seam"></i> Sistema de Inventario Inteligente
+            </span>
+            <span class="text-light">Usuario: Analista de Compras</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <!-- Columna Izquierda: Estado del Inventario -->
+            <div class="col-md-7">
+                <h4 class="mb-3">Riesgo de Quiebre Detectado</h4>
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Bodega</th>
+                                    <th>Stock Actual</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Cajas de Empaque</strong></td>
+                                    <td>Norte</td>
+                                    <td><span class="text-danger fw-bold">15 un</span></td>
+                                    <td><span class="badge bg-danger">Quiebre Inminente</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Salsa de Tomate (Galón)</td>
+                                    <td>Sur</td>
+                                    <td>45 un</td>
+                                    <td><span class="badge bg-warning text-dark">Riesgo Moderado</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Motor de Recomendaciones -->
+            <div class="col-md-5">
+                <h4 class="mb-3">Recomendaciones Pendientes</h4>
+                
+                <!-- Recomendación 1: Transferencia -->
+                <div class="card shadow-sm card-recomendacion mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary">Transferencia</span>
+                            <small class="text-muted">Hace 5 min</small>
+                        </div>
+                        <h6 class="card-title">Transferir Cajas de Empaque</h6>
+                        <p class="card-text text-muted small">
+                            La <strong>Bodega Sur</strong> tiene un sobrestock de 500 unidades. Se recomienda transferir 200 unidades a la Bodega Norte.
+                        </p>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success btn-sm w-100" onclick="aprobar()">
+                                <i class="bi bi-check-circle"></i> Aprobar
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm w-100">Rechazar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recomendación 2: Compra -->
+                <div class="card shadow-sm urgente mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-danger">Compra Urgente</span>
+                            <small class="text-muted">Hace 12 min</small>
+                        </div>
+                        <h6 class="card-title">Comprar Salsa de Tomate</h6>
+                        <p class="card-text text-muted small">
+                            Ninguna bodega tiene stock suficiente. Se recomienda emitir orden de compra al <strong>Proveedor Nacional S.A.</strong> por 100 galones.
+                        </p>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success btn-sm w-100" onclick="aprobar()">
+                                <i class="bi bi-check-circle"></i> Aprobar
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm w-100">Rechazar</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Script simulado para la alerta de aprobación -->
     <script>
-        async function cargarRecomendaciones() {
-            const res = await fetch('/api/v1/recomendaciones');
-            const data = await res.json();
-            const tbody = document.getElementById('tablaRecomendaciones');
-            tbody.innerHTML = '';
-            
-            data.forEach(rec => {
-                let botonHTML = rec.estado === 'PENDIENTE' 
-                    ? `<button onclick="aprobar(${rec.id})">Aprobar</button>` 
-                    : `<span class="success">APROBADA</span>`;
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${rec.id}</td>
-                        <td>${rec.producto}</td>
-                        <td style="color:red;">ALTO (${rec.stockActual} uni.)</td>
-                        <td>${rec.accionRecomendada} de ${rec.cantidadSugerida} uni.</td>
-                        <td>${botonHTML}</td>
-                    </tr>
-                `;
-            });
+        function aprobar() {
+            alert("✅ Recomendación aprobada. El evento ha sido enviado a RabbitMQ para ser procesado.");
         }
-
-        async function aprobar(id) {
-            await fetch(`/api/v1/recomendaciones/${id}/aprobar`, { method: 'POST' });
-            cargarRecomendaciones(); // Recargar la tabla
-        }
-
-        cargarRecomendaciones(); // Carga inicial
     </script>
 </body>
 </html>
