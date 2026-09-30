@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Inventario - Restaurantes</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 700px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+        th { background-color: #f4f4f4; }
+        button { padding: 5px 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .success { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Recomendaciones por Riesgo de Quiebre (Stock bajo)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Producto</th>
+                <th>Riesgo</th>
+                <th>Recomendación</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody id="tablaRecomendaciones">
+            <!-- Llenado por JS -->
+        </tbody>
+    </table>
+
+    <script>
+        async function cargarRecomendaciones() {
+            const res = await fetch('/api/v1/recomendaciones');
+            const data = await res.json();
+            const tbody = document.getElementById('tablaRecomendaciones');
+            tbody.innerHTML = '';
+            
+            data.forEach(rec => {
+                let botonHTML = rec.estado === 'PENDIENTE' 
+                    ? `<button onclick="aprobar(${rec.id})">Aprobar</button>` 
+                    : `<span class="success">APROBADA</span>`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${rec.id}</td>
+                        <td>${rec.producto}</td>
+                        <td style="color:red;">ALTO (${rec.stockActual} uni.)</td>
+                        <td>${rec.accionRecomendada} de ${rec.cantidadSugerida} uni.</td>
+                        <td>${botonHTML}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function aprobar(id) {
+            await fetch(`/api/v1/recomendaciones/${id}/aprobar`, { method: 'POST' });
+            cargarRecomendaciones(); // Recargar la tabla
+        }
+
+        cargarRecomendaciones(); // Carga inicial
+    </script>
+</body>
+</html>
